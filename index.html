@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<!-- © Copyright 2025 Kirill Talanov -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CreatorHub – MVP Demo</title>
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --card: #12141a;
+      --muted: #9aa3af;
+      --text: #e5e7eb;
+      --accent: #4f46e5;
+      --accent-2: #22c55e;
+      --border: #242736;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      background: linear-gradient(180deg, #0b0c10 0%, #12141a 100%);
+      color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .nav { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px 0; }
+    .logo { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:0.3px; }
+    .logo .mark { width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg, var(--accent), #9333ea); display:grid; place-items:center; font-weight:900; }
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:#161926; color:var(--text); cursor:pointer; transition:0.2s ease; }
+    .btn:hover { transform: translateY(-1px); border-color:#31364a; }
+    .btn.primary { background: linear-gradient(135deg, var(--accent), #9333ea); border-color: transparent; }
+    .btn.ghost { background: transparent; }
+
+    /* Layout switcher */
+    .page { display:none; }
+    .page.active { display:block; }
+
+    /* Hero */
+    .hero { padding: 56px 0 24px; text-align:center; }
+    .hero h1 { font-size: clamp(28px, 5vw, 44px); line-height:1.1; margin: 12px 0; }
+    .hero p { color: var(--muted); max-width: 760px; margin: 12px auto 24px; }
+    .hero .cta { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+
+    /* Feature grid */
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-top:28px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius:16px; padding:16px; }
+    .card h3 { margin:0 0 6px; font-size:16px; }
+    .muted { color: var(--muted); }
+
+    /* Fake screenshot */
+    .screenshot { margin: 28px auto; border-radius:20px; border:1px solid var(--border); overflow:hidden; background:#0f1220; }
+    .skeleton { height: 280px; display:grid; grid-template-columns: 180px 1fr; }
+    .skeleton .sidebar { background:#0c1020; border-right:1px solid #1d2340; }
+    .skeleton .content { padding:16px; display:grid; grid-template-rows: 28px 1fr; gap:10px; }
+    .skeleton .bar { height:16px; background:#1b2142; border-radius:6px; }
+    .skeleton .thumbs { display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; }
+    .skeleton .thumb { background:#1a203d; border-radius:12px; height:120px; }
+
+    /* Pricing table */
+    .pricing { margin: 42px 0; display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; }
+    .price { padding:20px; border-radius:16px; border:1px solid var(--border); background:var(--card); }
+    .price.highlight { border-color:#3942ff66; box-shadow: 0 0 0 1px #3942ff33 inset; }
+    .price h2 { margin:0 0 8px; }
+    .price ul { margin:10px 0 0; padding:0 0 0 18px; }
+
+    /* Creator page */
+    .profile { display:flex; gap:16px; align-items:center; }
+    .avatar { width:84px; height:84px; border-radius:16px; background:linear-gradient(135deg, #374151, #111827); display:grid; place-items:center; font-weight:800; font-size:28px; }
+    .pill { display:inline-block; padding:4px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
+    .videos { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:14px; }
+    .video { background:#141726; border:1px solid var(--border); border-radius:14px; padding:10px; }
+    .thumb { height:120px; border-radius:10px; background:linear-gradient(135deg, #202640, #0f1225); border:1px solid #222848; margin-bottom:8px; }
+    .footer { margin-top:24px; padding-top:16px; border-top:1px dashed var(--border); color:var(--muted); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .notice { font-size: 13px; color: var(--muted); }
+
+    /* Utility */
+    .stack { display:grid; gap:10px; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .spacer { height: 18px; }
+    .section { margin: 24px 0; }
+    .h2 { font-size: 20px; font-weight:700; margin: 0 0 8px; }
+    .link { color:#a5b4fc; text-decoration:underline; text-underline-offset:2px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav">
+      <div class="logo"><div class="mark">C</div>CreatorHub.xyz</div>
+      <div class="row">
+        <button class="btn ghost" onclick="showPage('landing')">Landing</button>
+        <button class="btn ghost" onclick="showPage('creator')">Creator Page Demo</button>
+        <a class="btn" href="#" onclick="alert('Auth disabled in demo')">Log In</a>
+        <a class="btn primary" href="#" onclick="alert('Signup disabled in demo')">Get Your Free Page</a>
+      </div>
+    </nav>
+
+    <!-- LANDING PAGE -->
+    <section id="landing" class="page active">
+      <header class="hero">
+        <span class="pill">MVP Demo</span>
+        <h1>The auto‑updating homepage for creators</h1>
+        <p>One link that always shows your latest content. Free subdomain. Upgrade for your own domain. Built to validate the idea fast and cheap.</p>
+        <div class="cta">
+          <a class="btn primary" href="#" onclick="showPage('creator')">See a Live Demo</a>
+          <a class="btn" href="#" onclick="alert('Waitlist stub in demo')">Join the Waitlist</a>
+        </div>
+      </header>
+
+      <div class="screenshot">
+        <div class="skeleton">
+          <div class="sidebar"></div>
+          <div class="content">
+            <div class="bar"></div>
+            <div class="thumbs">
+              <div class="thumb"></div>
+              <div class="thumb"></div>
+              <div class="thumb"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="grid">
+        <div class="card">
+          <h3>Auto‑updated feed</h3>
+          <div class="muted">Pulls your latest 3 YouTube uploads. No manual updates. Add other links manually for MVP.</div>
+        </div>
+        <div class="card">
+          <h3>Free subdomain</h3>
+          <div class="muted">Get <strong>yourname.creatorhub.xyz</strong> instantly. Point your domain when you upgrade.</div>
+        </div>
+        <div class="card">
+          <h3>Fast to ship</h3>
+          <div class="muted">Next.js + Vercel + Firebase/Supabase. Cheap, reliable, and solo‑founder friendly.</div>
+        </div>
+        <div class="card">
+          <h3>Simple pricing</h3>
+          <div class="muted">Validate with a single premium: $7/month for custom domain + remove branding.</div>
+        </div>
+      </section>
+
+      <section class="pricing">
+        <div class="price">
+          <h2>Free</h2>
+          <div class="muted">For getting started</div>
+          <ul>
+            <li>Subdomain on creatorhub.xyz</li>
+            <li>Auto‑updated last 3 YouTube videos</li>
+            <li>Add manual links (Twitch, Patreon, etc.)</li>
+            <li>CreatorHub branding</li>
+          </ul>
+          <div class="spacer"></div>
+          <button class="btn" onclick="showPage('creator')">Preview</button>
+        </div>
+        <div class="price highlight">
+          <h2>Premium — $7/mo</h2>
+          <div class="muted">For a professional look</div>
+          <ul>
+            <li>Use your own domain</li>
+            <li>Remove CreatorHub branding</li>
+            <li>Add 2 extra platforms (manual links)</li>
+          </ul>
+          <div class="spacer"></div>
+          <button class="btn primary" onclick="alert('Stripe not wired in demo')">Upgrade</button>
+        </div>
+      </section>
+    </section>
+
+    <!-- CREATOR PAGE DEMO -->
+    <section id="creator" class="page">
+      <div class="section">
+        <div class="row" style="justify-content:space-between; align-items:center;">
+          <div class="profile">
+            <div class="avatar">P</div>
+            <div class="stack">
+              <div style="font-weight:700; font-size:20px;">PewDiePie</div>
+              <div class="row muted" style="gap:14px;">
+                <a class="link" href="#">youtube.com/pewdiepie</a>
+                <a class="link" href="#">twitch.tv/pewdiepie</a>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <span class="pill" id="url-pill">pewdiepie.creatorhub.xyz</span>
+            <button class="btn" onclick="togglePremium()" id="premium-toggle">Toggle Premium</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="h2">Latest uploads</div>
+        <div class="videos">
+          <div class="video">
+            <div class="thumb"></div>
+            <div style="font-weight:600;">I tried the hardest game ever</div>
+            <div class="muted">12 minutes · 120k views</div>
+          </div>
+          <div class="video">
+            <div class="thumb"></div>
+            <div style="font-weight:600;">Reacting to cursed memes</div>
+            <div class="muted">9 minutes · 98k views</div>
+          </div>
+          <div class="video">
+            <div class="thumb"></div>
+            <div style="font-weight:600;">24h challenge with no sleep</div>
+            <div class="muted">18 minutes · 150k views</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="h2">Links</div>
+        <div class="stack">
+          <a class="btn" href="#">Twitch</a>
+          <a class="btn" href="#">Patreon</a>
+          <a class="btn" href="#">Instagram</a>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="notice" id="branding">Made with CreatorHub.xyz — <a class="link" href="#" onclick="showPage('landing')">Get your free page</a></div>
+        <div class="row muted"><span class="pill">Demo: static data</span><span class="pill">YouTube only (MVP)</span></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function showPage(id){
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    let premium = false;
+    function togglePremium(){
+      premium = !premium;
+      const branding = document.getElementById('branding');
+      const url = document.getElementById('url-pill');
+      const btn = document.getElementById('premium-toggle');
+      if (premium){
+        branding.style.display = 'none';
+        url.textContent = 'pewdiepie.com';
+        btn.textContent = 'Toggle Premium (ON)';
+      } else {
+        branding.style.display = '';
+        url.textContent = 'pewdiepie.creatorhub.xyz';
+        btn.textContent = 'Toggle Premium';
+      }
+    }
+  </script>
+</body>
+</html>
